@@ -22,21 +22,29 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "test_server" {
   name        = "terrakube-test-vm"
-  target_node = "pve" # CHANGE THIS to your Proxmox node name
-  iso         = "local:iso/ubuntu-20.04.iso" # Ensure this ISO exists on your Proxmox storage
+  target_node = "pve" # Change if your node name is different
+  
+  # CHANGE 1: 'iso' must now be inside a cdrom block
+  cdrom {
+    iso = "local:iso/ubuntu-22.04.5-live-server-amd64.iso"
+  }
 
   cores       = 2
   memory      = 2048
   agent       = 1
   
   network {
+    # CHANGE 2: 'id' is now required
+    id     = 0
     model  = "virtio"
     bridge = "vmbr0"
   }
 
   disk {
+    # CHANGE 3: 'slot' is now required
+    slot    = "scsi0"
     type    = "scsi"
-    storage = "local-lvm" # CHANGE THIS to your storage ID
+    storage = "local-lvm"
     size    = "10G"
   }
 }
