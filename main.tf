@@ -69,7 +69,10 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   agent { enabled = false }
 
   memory { dedicated = each.value.memory }
-  cpu    { cores = each.value.cores }
+  cpu { 
+    cores = each.value.cores 
+    type  = "host"   # This replaces the default 'qemu64'
+  }
 
   initialization {
     ip_config {
