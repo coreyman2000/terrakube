@@ -2,14 +2,17 @@ terraform {
   required_providers {
     proxmox = {
       source = "bpg/proxmox"
-      version = "0.69.1"
+      version = "0.89.1" # CHANGED: Updated from 0.69.1 to latest
     }
   }
 }
 
 provider "proxmox" {
   endpoint = var.pm_api_url
+  
+  # bpg provider uses just "api_token", not "pm_api_token_..."
   api_token = "${var.pm_user}=${var.pm_password}"
+  
   insecure = true
   tmp_dir  = "/tmp"
 }
@@ -31,10 +34,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     }
 
     user_account {
-      # The default user for Ubuntu Cloud Images is 'ubuntu'
       username = "ubuntu" 
-      
-      # Inject the key from Terrakube variables
       keys = [var.ssh_public_key] 
     }
   }
@@ -69,6 +69,4 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
 variable "pm_api_url" { type = string }
 variable "pm_user" { type = string }
 variable "pm_password" { type = string }
-
-# Define the new variable
 variable "ssh_public_key" { type = string }
