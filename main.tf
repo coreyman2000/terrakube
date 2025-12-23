@@ -9,22 +9,14 @@ terraform {
 
 provider "proxmox" {
   endpoint = var.pm_api_url
-  
-  # Connect using your existing variables
-  # Format combines them: user@realm!token=secret
   api_token = "${var.pm_user}=${var.pm_password}"
-  
   insecure = true
-  
-  # This provider needs a tmp folder
   tmp_dir  = "/tmp"
 }
 
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   name      = "test-ubuntu"
   node_name = "proxmox2"
-
-  # should be true if qemu agent is not installed / enabled on the VM
   stop_on_destroy = true
   
   agent {
@@ -32,7 +24,6 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   }
 
   initialization {
-    # THIS IS THE NEW PART FOR DHCP
     ip_config {
       ipv4 {
         address = "dhcp"
@@ -40,9 +31,11 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     }
 
     user_account {
-      # do not use this in production, configure your own ssh key instead!
-      username = "user"
-      password = "password"
+      # The default user for Ubuntu Cloud Images is 'ubuntu'
+      username = "ubuntu" 
+      
+      # Inject the key from Terrakube variables
+      keys = [var.ssh_public_key] 
     }
   }
 
@@ -70,10 +63,12 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
   datastore_id = "local"
   node_name    = "proxmox2"
   url          = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
-  # need to rename the file to *.qcow2 to indicate the actual file format for import
-  file_name = "jammy-server-cloudimg-amd64.qcow2"
+  file_name    = "jammy-server-cloudimg-amd64.qcow2"
 }
 
 variable "pm_api_url" { type = string }
 variable "pm_user" { type = string }
 variable "pm_password" { type = string }
+
+# Define the new variable
+variable "ssh_public_key" { type = string }
