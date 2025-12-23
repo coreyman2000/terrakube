@@ -2,8 +2,8 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "Telmate/proxmox"
-      version = "2.9.14"
+      source  = "Telmate/proxmox"
+      version = "3.0.2-rc07"  # Changed from 2.9.14 to fix Proxmox 9 support
     }
   }
 }
