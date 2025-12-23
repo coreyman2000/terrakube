@@ -1,47 +1,58 @@
-# test 
 terraform {
   required_providers {
     proxmox = {
-      source  = "Telmate/proxmox"
-      version = "3.0.2-rc07"  # Changed from 2.9.14 to fix Proxmox 9 support
+      source = "bpg/proxmox"
+      version = "0.69.1"
     }
   }
 }
 
 provider "proxmox" {
-  pm_api_url          = var.pm_api_url
+  endpoint = var.pm_api_url
   
-  # CHANGE: Use token arguments instead of user/password
-  pm_api_token_id     = var.pm_user      # Use the value "root@pam!terrakube"
-  pm_api_token_secret = var.pm_password  # Use the UUID secret
+  # Connect using your existing variables
+  # Format combines them: user@realm!token=secret
+  api_token = "${var.pm_user}=${var.pm_password}"
   
-  # IMPORTANT: Do NOT include pm_user or pm_password lines here
+  insecure = true
   
-  pm_tls_insecure     = true
+  # This provider needs a tmp folder
+  tmp_dir  = "/tmp"
 }
 
-resource "proxmox_vm_qemu" "test_server" {
-  name        = "terrakube-test-vm"
-  target_node = "pve"
-  
-  # CHANGE: Try this as a simple string argument
-  cdrom = "local:iso/ubuntu-20.04.iso"
+resource "proxmox_virtual_environment_vm" "test_server" {
+  name      = "terrakube-vm"
+  node_name = "pve" # CHANGE THIS if your node is not named 'pve'
 
-  cores       = 2
-  memory      = 2048
-  agent       = 1
-  
-  network {
-    id     = 0
-    model  = "virtio"
+  cpu {
+    cores = 2
+  }
+
+  memory {
+    dedicated = 2048
+  }
+
+  agent {
+    enabled = true
+  }
+
+  network_device {
     bridge = "vmbr0"
   }
 
   disk {
-    slot    = "scsi0"
-    type    = "scsi"
-    storage = "local-lvm"
-    size    = "10G"
+    datastore_id = "local-lvm" # CHANGE THIS if your storage is local-zfs
+    interface    = "scsi0"
+    size         = 10
+    file_format  = "raw"
+  }
+
+  cdrom {
+    file_id = "local:iso/ubuntu-20.04.iso" # Ensure this path is 100% correct in Proxmox
+  }
+  
+  operating_system {
+    type = "l26" # Linux 2.6+
   }
 }
 
