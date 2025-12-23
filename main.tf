@@ -12,6 +12,14 @@ provider "proxmox" {
   api_token = "${var.pm_user}=${var.pm_password}"
   insecure  = true
   tmp_dir   = "/tmp"
+
+  # ADD THIS SECTION:
+  ssh {
+    agent    = true          # Recommended: Use your local ssh-agent
+    username = "root"        # Or your Proxmox sudo user
+    # If you don't use an agent, you can use:
+    # private_key = file("~/.ssh/id_rsa")
+  }
 }
 
 # --- 1. DEFINE AVAILABLE IMAGES ---
