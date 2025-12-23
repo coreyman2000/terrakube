@@ -22,7 +22,7 @@ provider "proxmox" {
 
 resource "proxmox_virtual_environment_vm" "test_server" {
   name      = "terrakube-vm"
-  node_name = "pve" # CHANGE THIS if your node is not named 'pve'
+  node_name = "proxmox2" # CHANGE THIS if your node is not named 'pve'
 
   cpu {
     cores = 2
