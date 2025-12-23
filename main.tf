@@ -28,6 +28,11 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   stop_on_destroy = true
 
   initialization {
+    ip_config {
+          ipv4 {
+            address = "dhcp"
+          }
+    }
     user_account {
       # do not use this in production, configure your own ssh key instead!
       username = "user"
