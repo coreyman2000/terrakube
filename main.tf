@@ -65,7 +65,7 @@ packages:
   - qemu-guest-agent
 
 # 2. Configure the User (Moves it from the VM block to the snippet)
-user: ${each.value.username}
+user: ${var.vm_username}
 password: ${var.vm_password}
 chpasswd: { expire: False }
 ssh_authorized_keys:
