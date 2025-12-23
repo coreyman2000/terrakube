@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     proxmox = {
-      source  = "bpg/proxmox"
+      source = "bpg/proxmox"
       version = "0.89.1"
     }
   }
@@ -13,19 +13,20 @@ provider "proxmox" {
   insecure  = true
 
   ssh {
-    agent    = false
     username = "root"
-    password = var.proxmox_ssh_password
+    password = var.proxmox_ssh_password # Reference the new variable here
   }
 }
 
 # --- 1. DEFINE AVAILABLE IMAGES ---
 variable "cloud_images" {
-  description = "Map of cloud images to download"
+  description = "Map of cloud images to download (Name -> URL)"
   type = map(object({
     url       = string
     file_name = string
   }))
+  # We set defaults here so you don't HAVE to put this in Terrakube variables, 
+  # but you can override it if you want.
   default = {
     "ubuntu-jammy" = {
       url       = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
@@ -38,39 +39,39 @@ variable "cloud_images" {
   }
 }
 
-# --- 2. DEFINE VMS ---
+# --- 2. DEFINE VMS (Now with 'image' selection) ---
 variable "virtual_machines" {
   description = "Map of VMs to deploy"
   type = map(object({
     cores    = number
     memory   = number
-    image    = string
-    username = string
+    image    = string # Must match a key in 'cloud_images' (e.g. "ubuntu-jammy")
+    username = string # Cloud-init user varies by OS (ubuntu vs debian)
   }))
 }
 
-# --- 3. CLOUD-INIT SNIPPETS (Dynamic per VM) ---
 resource "proxmox_virtual_environment_file" "cloud_config" {
-  for_each     = var.virtual_machines
   content_type = "snippets"
   datastore_id = "local"
   node_name    = "proxmox2"
 
   source_raw {
-    file_name = "cloud-config-${each.key}.yaml"
-    
+    file_name = "vm-init-config.yaml"
     data = <<EOF
 #cloud-config
+# 1. Update and install Guest Agent
 package_update: true
 packages:
   - qemu-guest-agent
 
-user: ${each.value.username}
+# 2. Configure the User (Moves it from the VM block to the snippet)
+user: root
 password: password
 chpasswd: { expire: False }
 ssh_authorized_keys:
-  - ${trimspace(var.ssh_public_key)}
+  - ${var.ssh_public_key}
 
+# 3. Start the Agent
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
@@ -78,7 +79,7 @@ EOF
   }
 }
 
-# --- 4. DOWNLOAD IMAGES ---
+# --- 3. DOWNLOAD ALL IMAGES ---
 resource "proxmox_virtual_environment_download_file" "images" {
   for_each = var.cloud_images
 
@@ -90,7 +91,7 @@ resource "proxmox_virtual_environment_download_file" "images" {
   overwrite_unmanaged = true
 }
 
-# --- 5. CREATE VMS ---
+# --- 4. CREATE VMS ---
 resource "proxmox_virtual_environment_vm" "vm_loop" {
   for_each = var.virtual_machines
 
@@ -103,18 +104,18 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   memory { dedicated = each.value.memory }
   cpu { 
     cores = each.value.cores 
-    type  = "host" 
+    type  = "host"   # This replaces the default 'qemu64'
   }
 
   initialization {
-    # Reference the specific snippet for THIS VM
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config[each.key].id
-
+    # This links the uploaded snippet to the VM
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
     ip_config {
       ipv4 { address = "dhcp" }
     }
 
     user_account {
+      # Use the specific username for this VM (e.g. ubuntu or debian)
       username = each.value.username 
       password = "password"
       keys     = [var.ssh_public_key]
@@ -123,7 +124,11 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
 
   disk {
     datastore_id = "local-lvm"
+    
+    # MAGIC HAPPENS HERE:
+    # Look up the correct image ID based on the 'image' name provided in the variable
     import_from  = proxmox_virtual_environment_download_file.images[each.value.image].id
+    
     interface    = "virtio0"
     iothread     = true
     discard      = "on"
@@ -135,12 +140,12 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   operating_system { type = "l26" }
 }
 
-# --- VARIABLES ---
 variable "pm_api_url" { type = string }
 variable "pm_user" { type = string }
 variable "pm_password" { type = string }
 variable "ssh_public_key" { type = string }
 variable "proxmox_ssh_password" {
-  type      = string
-  sensitive = true
+  description = "The root password for the Proxmox host OS"
+  type        = string
+  sensitive   = true
 }
