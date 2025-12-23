@@ -139,7 +139,7 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
     interface    = "virtio0"
     iothread     = true
     discard      = "on"
-    size         = 20
+    size         = 25
     file_format  = "raw"
   }
   
