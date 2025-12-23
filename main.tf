@@ -78,6 +78,7 @@ runcmd:
   - ln -sf /usr/bin/python3 /usr/bin/python
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
+  - dnf update -y
 EOF
   }
 }
