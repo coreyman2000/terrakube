@@ -46,6 +46,25 @@ variable "virtual_machines" {
   }))
 }
 
+resource "proxmox_virtual_environment_file" "cloud_config" {
+  content_type = "snippets"
+  datastore_id = "local"     # This must be a datastore that supports snippets
+  node_name    = "proxmox2"
+
+  source_raw {
+    file_name = "install-agent.yaml"
+    data = <<EOF
+#cloud-config
+package_update: true
+packages:
+  - qemu-guest-agent
+runcmd:
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
+EOF
+  }
+}
+
 # --- 3. DOWNLOAD ALL IMAGES ---
 resource "proxmox_virtual_environment_download_file" "images" {
   for_each = var.cloud_images
@@ -75,6 +94,8 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   }
 
   initialization {
+    # This links the uploaded snippet to the VM
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
     ip_config {
       ipv4 { address = "dhcp" }
     }
