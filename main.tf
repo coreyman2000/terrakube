@@ -63,6 +63,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 package_update: true
 packages:
   - qemu-guest-agent
+  - [python-unversioned-command, false]
 
 # 2. Configure the User (Moves it from the VM block to the snippet)
 user: ${var.vm_username}
