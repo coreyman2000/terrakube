@@ -61,6 +61,7 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 #cloud-config
 # 1. Update and install Guest Agent
 package_update: true
+package_upgrade: true
 packages:
   - qemu-guest-agent
   - [python-unversioned-command, false]
