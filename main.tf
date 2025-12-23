@@ -9,11 +9,15 @@ terraform {
 }
 
 provider "proxmox" {
-  # These will be pulled from Terrakube variables
-  pm_api_url      = var.pm_api_url
-  pm_user         = var.pm_user
-  pm_password     = var.pm_password
-  pm_tls_insecure = true
+  pm_api_url          = var.pm_api_url
+  
+  # CHANGE: Use token arguments instead of user/password
+  pm_api_token_id     = var.pm_user      # Use the value "root@pam!terrakube"
+  pm_api_token_secret = var.pm_password  # Use the UUID secret
+  
+  # IMPORTANT: Do NOT include pm_user or pm_password lines here
+  
+  pm_tls_insecure     = true
 }
 
 resource "proxmox_vm_qemu" "test_server" {
