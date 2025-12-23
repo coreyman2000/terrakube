@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source = "bpg/proxmox"
-      version = "0.89.1"
+      version = "0.69.1"
     }
   }
 }
@@ -26,13 +26,19 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
 
   # should be true if qemu agent is not installed / enabled on the VM
   stop_on_destroy = true
+  
+  agent {
+    enabled = true
+  }
 
   initialization {
+    # THIS IS THE NEW PART FOR DHCP
     ip_config {
-          ipv4 {
-            address = "dhcp"
-          }
+      ipv4 {
+        address = "dhcp"
+      }
     }
+
     user_account {
       # do not use this in production, configure your own ssh key instead!
       username = "user"
@@ -47,9 +53,15 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     iothread     = true
     discard      = "on"
     size         = 20
+    file_format  = "raw"
   }
+  
   network_device {
     bridge = "vmbr0"
+  }
+  
+  operating_system {
+    type = "l26"
   }
 }
 
@@ -61,6 +73,7 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
   # need to rename the file to *.qcow2 to indicate the actual file format for import
   file_name = "jammy-server-cloudimg-amd64.qcow2"
 }
+
 variable "pm_api_url" { type = string }
 variable "pm_user" { type = string }
 variable "pm_password" { type = string }
