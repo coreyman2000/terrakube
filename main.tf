@@ -8,10 +8,15 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = var.pm_api_url
+  endpoint  = var.pm_api_url
   api_token = "${var.pm_user}=${var.pm_password}"
-  insecure = true
-  tmp_dir  = "/tmp"
+  insecure  = true
+
+  ssh {
+    agent    = true
+    username = "root" # The OS user of your Proxmox node
+    # The provider will automatically use 192.168.1.251 from your API URL
+  }
 }
 
 # --- 1. DEFINE AVAILABLE IMAGES ---
