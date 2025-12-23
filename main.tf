@@ -14,8 +14,26 @@ provider "proxmox" {
   tmp_dir  = "/tmp"
 }
 
+# --- 1. NEW VARIABLE FOR MULTIPLE VMS ---
+variable "virtual_machines" {
+  description = "Map of VMs to deploy"
+  # This expects a format like:
+  # {
+  #   "vm-name-1" = { cores = 2, memory = 2048 }
+  #   "vm-name-2" = { cores = 4, memory = 4096 }
+  # }
+  type = map(object({
+    cores  = number
+    memory = number
+  }))
+}
+
 resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
-  name      = "test-ubuntu"
+  # --- 2. THE LOOP ---
+  for_each = var.virtual_machines
+
+  # Use the key from the variable (e.g., "web-server") as the VM Name
+  name      = each.key
   node_name = "proxmox2"
   stop_on_destroy = true
   
@@ -23,14 +41,15 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     enabled = false
   }
 
-  # --- ADDED MEMORY BLOCK HERE ---
+  # --- 3. DYNAMIC SPECS ---
   memory {
-    dedicated = 2048
+    # Use the value from the variable (e.g., 2048)
+    dedicated = each.value.memory
   }
 
-  # Optional: Define CPU cores if you want
   cpu {
-    cores = 2
+    # Use the value from the variable (e.g., 2)
+    cores = each.value.cores
   }
 
   initialization {
