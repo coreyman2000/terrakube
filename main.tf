@@ -66,7 +66,7 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   node_name       = "proxmox2"
   stop_on_destroy = true
   
-  agent { enabled = false }
+  agent { enabled = true }
 
   memory { dedicated = each.value.memory }
   cpu { 
