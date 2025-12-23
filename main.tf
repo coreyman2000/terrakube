@@ -91,6 +91,7 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
   node_name    = "proxmox2"
   url          = "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
   file_name    = "jammy-server-cloudimg-amd64.qcow2"
+  overwrite_unmanaged = true
 }
 
 variable "pm_api_url" { type = string }
