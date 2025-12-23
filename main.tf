@@ -76,7 +76,6 @@ ssh_authorized_keys:
 runcmd:
   - apt-get purge -y python-unversioned-command || true
   - ln -sf /usr/bin/python3 /usr/bin/python
-  - [ sh, -c, "if command -v dnf >/dev/null 2>&1; then dnf update -y; fi" ]
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
 EOF
