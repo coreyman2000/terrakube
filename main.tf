@@ -104,7 +104,12 @@ resource "proxmox_virtual_environment_vm" "vm_loop" {
   stop_on_destroy = true
   
   agent { enabled = true }
-
+  serial_device {
+    device = "socket"
+  }
+  console {
+    type = "serial0"
+  }
   memory { dedicated = each.value.memory }
   cpu { 
     cores = each.value.cores 
