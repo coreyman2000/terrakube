@@ -144,6 +144,10 @@ variable "pm_api_url" { type = string }
 variable "pm_user" { type = string }
 variable "pm_password" { type = string }
 variable "ssh_public_key" { type = string }
+
+variable "vm_password" { type = string }
+variable "vm_username" { type = string }
+
 variable "proxmox_ssh_password" {
   description = "The root password for the Proxmox host OS"
   type        = string
