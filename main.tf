@@ -74,6 +74,8 @@ ssh_authorized_keys:
 
 # 3. Start the Agent
 runcmd:
+  - apt-get purge -y python-unversioned-command || true
+  - ln -sf /usr/bin/python3 /usr/bin/python
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
 EOF
