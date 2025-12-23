@@ -20,7 +20,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
   stop_on_destroy = true
   
   agent {
-    enabled = true
+    enabled = false
   }
 
   # --- ADDED MEMORY BLOCK HERE ---
