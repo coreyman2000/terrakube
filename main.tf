@@ -51,17 +51,28 @@ variable "virtual_machines" {
 }
 
 resource "proxmox_virtual_environment_file" "cloud_config" {
+  for_each     = var.virtual_machines
   content_type = "snippets"
-  datastore_id = "local"     # This must be a datastore that supports snippets
+  datastore_id = "local"
   node_name    = "proxmox2"
 
   source_raw {
-    file_name = "install-agent.yaml"
+    # Unique filename per VM
+    file_name = "cloud-config-${each.key}.yaml"
+    
     data = <<EOF
 #cloud-config
 package_update: true
 packages:
   - qemu-guest-agent
+
+# Dynamic User configuration
+user: ${each.value.username}
+password: password
+chpasswd: { expire: False }
+ssh_authorized_keys:
+  - ${var.ssh_public_key}
+
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
