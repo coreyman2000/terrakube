@@ -13,9 +13,8 @@ provider "proxmox" {
   insecure  = true
 
   ssh {
-    agent    = true
-    username = "root" # The OS user of your Proxmox node
-    # The provider will automatically use 192.168.1.251 from your API URL
+    username = "root"
+    password = var.proxmox_ssh_password # Reference the new variable here
   }
 }
 
