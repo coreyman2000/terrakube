@@ -100,7 +100,7 @@ resource "proxmox_virtual_environment_download_file" "images" {
 }
 
 # --- 4. CREATE VMS ---
-resource "proxmox_virtual_environment_vm" "vm_loop" {
+resource "proxmox_virtual_environment_vm" "virtual_machines" {
   for_each = var.virtual_machines
 
   name            = each.key
