@@ -74,6 +74,10 @@ ssh_authorized_keys:
 
 # 3. Start the Agent
 runcmd:
+  - doas apk update
+  - doas apk add qemu-guest-agent
+  - doas rc-update add qemu-guest-agent default
+  - doas rc-service qemu-guest-agent start
   - apt-get purge -y python-unversioned-command || true
   - ln -sf /usr/bin/python3 /usr/bin/python
   - systemctl enable qemu-guest-agent
