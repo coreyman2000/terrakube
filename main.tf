@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "bpg/proxmox"
+      source = "terrakube-registry.platform.local/proxmox/proxmox/provider"
       version = "0.89.1"
     }
   }
