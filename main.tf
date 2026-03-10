@@ -138,7 +138,8 @@ resource "proxmox_virtual_environment_vm" "virtual_machines" {
 # --- 6. OPTIONAL MODULE CALL (As per your instructions) ---
 # If you want to use the Terrakube module alongside your code:
 module "proxmox_registry_module" {
-  source  = "terrakube-registry.platform.local/proxmox/proxmox/provider"
+  #source  = "terrakube-registry.platform.local/proxmox/proxmox/provider"
+  source  = "terrakube-registry.mgmt.ssclab.com/proxmox/proxmox/provider"
   version = "0.90.0"
   
   # Note: You only need this if the module provides 
