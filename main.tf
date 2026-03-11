@@ -84,7 +84,7 @@ resource "proxmox_virtual_environment_download_file" "images" {
   for_each = var.cloud_images
 
   content_type        = "import"
-  datastore_id        = "ceph-pool1"
+  datastore_id        = "nfs-iso"
   node_name           = "csc-pve-node-1"
   url                 = each.value.url
   file_name           = each.value.file_name
