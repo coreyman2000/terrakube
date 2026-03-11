@@ -122,7 +122,7 @@ resource "proxmox_virtual_environment_vm" "virtual_machines" {
   }
 
   disk {
-    datastore_id = "local-lvm"
+    datastore_id = "ceph-pool1"
     import_from  = proxmox_virtual_environment_download_file.images[each.value.image].id
     interface    = "virtio0"
     iothread     = true
