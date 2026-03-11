@@ -52,8 +52,8 @@ variable "virtual_machines" {
 # --- 3. CLOUD-INIT CONFIG ---
 resource "proxmox_virtual_environment_file" "cloud_config" {
   content_type = "snippets"
-  datastore_id = "local"
-  node_name    = "proxmox2"
+  datastore_id = "ceph-pool1"
+  node_name    = "csc-pve-node-1"
 
   source_raw {
     file_name = "vm-init-config.yaml"
@@ -84,8 +84,8 @@ resource "proxmox_virtual_environment_download_file" "images" {
   for_each = var.cloud_images
 
   content_type        = "import"
-  datastore_id        = "local"
-  node_name           = "proxmox2"
+  datastore_id        = "ceph-pool1"
+  node_name           = "csc-pve-node-1"
   url                 = each.value.url
   file_name           = each.value.file_name
   overwrite_unmanaged = true
@@ -96,7 +96,7 @@ resource "proxmox_virtual_environment_vm" "virtual_machines" {
   for_each = var.virtual_machines
 
   name            = each.key
-  node_name       = "proxmox2"
+  node_name       = "csc-pve-node-1"
   stop_on_destroy = true
   
   agent { enabled = true }
