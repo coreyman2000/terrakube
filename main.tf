@@ -131,7 +131,7 @@ resource "proxmox_virtual_environment_vm" "virtual_machines" {
     file_format  = "raw"
   }
   
-  network_device { bridge = "vmbr0" }
+  network_device { bridge = "vlan132" }
   operating_system { type = "l26" }
 }
 
